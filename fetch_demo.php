@@ -58,7 +58,7 @@
                 return response.json();
             }).then(function(data){
                 // success
-                //console.log(data);
+                console.log(data);
                 return data;
             }).catch(function (error){
                 console.log('Error :',error)

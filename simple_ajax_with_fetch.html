@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+
+
+<select id="weerstations"></select>
+<div>Grondtemperatuur in <span id="stationname"></span><span> : </span><span id="temp"></span></div>
+
+<script>
+
+
+
+
+    document.addEventListener("DOMContentLoaded",function() {
+
+        startme();
+
+        function startme() {
+            getWeatherData().then(function(d) {
+                let s = d.actual.stationmeasurements;
+                let c = document.getElementById("weerstations");
+
+                // zoek het station op na een change in de combobox
+                // en toon de grond temperatuur in de pagina
+                c.addEventListener("change",function() {
+                    let station = s.filter(function(item){
+                        return (item.stationid == c.value);
+                    });
+                    document.getElementById("stationname").innerText = station[0].regio;
+                    document.getElementById("temp").innerHTML = station[0].groundtemperature +  "&deg;C";
+
+                });
+
+                s.forEach(station => {
+                    //console.log(station)
+                    let o = document.createElement("option");
+                    o.value = station.stationid
+                    o.innerText = station.stationname;
+                    c.appendChild(o);
+                });
+                setTimeout(function() {
+                    startme();
+                },5000)
+            })
+        }
+
+
+        async function getWeatherData() {
+            return r = await fetch('https://data.buienradar.nl/2.0/feed/json')
+                .then(response => response.json())
+                .then(function(data) {
+                    return data;
+                } );
+        }
+
+
+    })
+</script>
+</body>
+</html>

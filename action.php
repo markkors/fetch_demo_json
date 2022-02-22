@@ -13,7 +13,7 @@ $data = json_decode(file_get_contents("php://input"));
 
 // doe je ding alhier, en geef eventueel als resultaat een JSON object terug
 sleep($data->extra);
-$result = [$data->extra,$data->student->firstname,"c"];
+$result = [$data->extra,$data->student->firstname,$data->student->lastname];
 
 http_response_code(201);
 // output
