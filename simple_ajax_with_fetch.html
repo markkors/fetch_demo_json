@@ -7,58 +7,87 @@
 <body>
 
 
-<select id="weerstations"></select>
-<div>Grondtemperatuur in <span id="stationname"></span><span> : </span><span id="temp"></span></div>
+<select id="weerstations" onchange="updateDLG(this)"></select>
+<div>Laatste meting:<span id="timestamp"></span></div>
+<div>Temperatuur in <span id="stationname"></span><span> : </span><span id="temp"></span></div>
 
 <script>
 
+    /**
+     * var that holds all the weatherstation data
+     * @type {null}
+     */
+    let stationdata = null;
+    /**
+     * Is combo filled with stationnames?
+     * @type {boolean}
+     */
+    let combofilled = false;
 
-
-
-    document.addEventListener("DOMContentLoaded",function() {
-
-        startme();
-
-        function startme() {
-            getWeatherData().then(function(d) {
-                let s = d.actual.stationmeasurements;
-                let c = document.getElementById("weerstations");
-
-                // zoek het station op na een change in de combobox
-                // en toon de grond temperatuur in de pagina
-                c.addEventListener("change",function() {
-                    let station = s.filter(function(item){
-                        return (item.stationid == c.value);
-                    });
-                    document.getElementById("stationname").innerText = station[0].regio;
-                    document.getElementById("temp").innerHTML = station[0].groundtemperature +  "&deg;C";
-
-                });
-
-                s.forEach(station => {
-                    //console.log(station)
-                    let o = document.createElement("option");
-                    o.value = station.stationid
-                    o.innerText = station.stationname;
-                    c.appendChild(o);
-                });
-                setTimeout(function() {
-                    startme();
-                },5000)
-            })
+    /**
+     * Zoek het station op na een change in de combobox
+     * en toon de data in de pagina
+     * @param e
+     */
+    function updateDLG(e) {
+        let selected_station = stationdata.find(function(item){
+            return (item.stationid==e.value)
+        });
+        console.log(selected_station);
+        document.getElementById("stationname").innerText = selected_station.regio;
+        let ts = new Date(selected_station.timestamp);
+        document.getElementById("timestamp").innerText = ts.toLocaleString();
+        if(selected_station.hasOwnProperty("temperature")) {
+            document.getElementById("temp").innerHTML = selected_station.temperature +  "&deg;C";
+        } else {
+            document.getElementById("temp").innerHTML = 'geen temperatuur gegevens gevonden';
         }
+    }
 
-
+    // What to do when document is loaded
+    document.addEventListener("DOMContentLoaded",function() {
+        startme();
+        /**
+         * Fetch the weather data async, when ready return promise
+         * @returns {Promise<any>}
+         */
         async function getWeatherData() {
             return r = await fetch('https://data.buienradar.nl/2.0/feed/json')
                 .then(response => response.json())
                 .then(function(data) {
                     return data;
-                } );
+                }).catch(error => {
+                    console.log(error);
+                }) ;
         }
 
+        /**
+         * Function to start when DOM is loaded
+         */
+        function startme() {
+            getWeatherData().then(function(d) {
+                // weerdata async binnengekomen...
+                stationdata = d.actual.stationmeasurements;
+                let c = document.getElementById("weerstations");
+                if(!combofilled) {
+                    stationdata.forEach(station => {
+                        //console.log(station)
+                        let o = document.createElement("option");
+                        o.value = station.stationid
+                        o.innerText = station.stationname;
+                        c.appendChild(o);
+                    });
+                    combofilled=true;
+                }
+                // fill the combo with stationnames
 
-    })
+                setTimeout(function() {
+                    // do it again after x milli-seconds
+                    startme();
+                },3600000) // 1 uur
+            })
+        }
+  });
 </script>
 </body>
 </html>
