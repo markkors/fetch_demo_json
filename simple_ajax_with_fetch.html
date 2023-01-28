@@ -10,6 +10,7 @@
 <select id="weerstations" onchange="updateDLG(this)"></select>
 <div>Laatste meting:<span id="timestamp"></span></div>
 <div>Temperatuur in <span id="stationname"></span><span> : </span><span id="temp"></span></div>
+<div>Windrichting: <span id="wind"></span></div>
 
 <script>
 
@@ -36,12 +37,19 @@
         console.log(selected_station);
         document.getElementById("stationname").innerText = selected_station.regio;
         let ts = new Date(selected_station.timestamp);
-        document.getElementById("timestamp").innerText = ts.toLocaleString();
+        document.getElementById("timestamp").innerText = `${ts.getDate()}-${ts.getMonth()+1}-${ts.getFullYear()} ${ts.getHours()}:${ts.getMinutes()}`;
         if(selected_station.hasOwnProperty("temperature")) {
             document.getElementById("temp").innerHTML = selected_station.temperature +  "&deg;C";
         } else {
             document.getElementById("temp").innerHTML = 'geen temperatuur gegevens gevonden';
         }
+
+        if(selected_station.hasOwnProperty("winddirection")) {
+            document.getElementById("wind").innerHTML = selected_station.winddirection ;
+        } else {
+            document.getElementById("wind").innerHTML = 'geen windrichting gegevens gevonden';
+        }
+
     }
 
     // What to do when document is loaded
@@ -87,6 +95,10 @@
                 },3600000) // 1 uur
             })
         }
+
+
+
+
   });
 </script>
 </body>
